@@ -1,0 +1,29 @@
+{
+  "name": "back",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@types/node-cron": "^3.0.11",
+    "apollo-server": "^3.13.0",
+    "axios": "^1.7.8",
+    "graphql": "^16.9.0",
+    "node-cron": "^3.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "prisma": "^5.22.0",
+    "ts-node-dev": "^2.0.0"
+  }
+}

@@ -1,0 +1,125 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Currency {
+  USD
+  KRW
+}
+
+enum AssetClass {
+  US_EQUITY // 미국 주식
+  KR_EQUITY // 한국 주식
+  BOND // 채권
+  CASH // 현금
+  COMMODITY // 코메디티
+}
+
+enum Account {
+  KW // 키움증권
+  MA // 미래에셋증권
+  ISA // ISA
+  KRX // 한국거래소
+  MA_CMA // 미래에셋증권 CMA
+  CASH // 현금
+  IRA // 개인퇴직계좌
+}
+
+enum Exchange {
+  NYS // 뉴욕
+  NAS // 나스닥
+  AMS // 아멕스
+  KRX // 한국
+}
+
+enum IncomeType {
+  INVESTMENT // 투자
+  PENSION // 연금
+  SAVINGS // 저축
+}
+
+model stock {
+  id           Int        @id @default(autoincrement())
+  symbol       String     @unique
+  name         String
+  quantity     Float
+  avgPrice     Float      @default(0)
+  currentPrice Float?
+  currency     Currency   @default(USD)
+  assetClass   AssetClass
+  account      Account
+  excd         Exchange?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model ExchangeRate {
+  id        Int      @id @default(autoincrement())
+  currency  String   @default("USD")
+  rate      Float
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([currency])
+}
+
+model portfolio {
+  id          Int      @id @default(autoincrement())
+  account     Account
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model token {
+  id          Int      @id @default(autoincrement())
+  accessToken String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model dividend {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  symbol    String
+  currency  Currency @default(KRW)
+  amount    Decimal  @db.Decimal(10, 2) // 최대 10자리, 소수점 2자리
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model income {
+  id        Int        @id @default(autoincrement())
+  date      String // YYYYMM 형식
+  type      IncomeType
+  amount    Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model salary {
+  id          Int      @id @default(autoincrement())
+  date        String // YYYYMM 형식
+  netAmount   Int // 세후월급
+  grossAmount Int // 세전월급
+  note        String? // 비고
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model assetHistory {
+  id               Int      @id @default(autoincrement())
+  date             DateTime @default(now())
+  investmentAmount Float // 총 투자금액
+  currentValue     Float // 총 평가금액
+  returnRate       Float // 수익률
+  totalReturn      Float // 총 수익금액
+  dividendReturn   Float // 배당수익
+  pureReturn       Float // 배당제외수익
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

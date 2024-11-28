@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "target": "es2018",
+      "module": "commonjs",
+      "lib": ["es2018", "esnext.asynciterable"],
+      "strict": false,
+      "rootDir": "src",
+      "outDir": "dist",
+      "esModuleInterop": true,
+      "skipLibCheck": true
+    },
+    "include": ["src/**/*"]
+  }
