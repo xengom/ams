@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useMutation, useQuery } from '@apollo/client';
-import { UPDATE_STOCK, DELETE_STOCK, DELETE_PORTFOLIO } from '../graphql/mutations';
-import { GET_ACCOUNT_PORTFOLIOS } from '../graphql/queries';
-import { formatNumber } from '../utils/numberFormat';
-import Modal from './common/Modal';
-import Button from './common/Button';
-import StockCard from './common/StockCard';
-import EditStockModal from './EditStockModal';
-import AddStockModal from './AddStockModal';
-import { toast } from 'react-hot-toast';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useMutation, useQuery } from "@apollo/client";
+import {
+  UPDATE_STOCK,
+  DELETE_STOCK,
+  DELETE_PORTFOLIO,
+} from "../../graphql/mutations";
+import { GET_ACCOUNT_PORTFOLIOS } from "../../graphql/queries";
+import { formatNumber } from "../../utils/numberFormat";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
+import StockCard from "../common/StockCard";
+import EditStockModal from "./EditStockModal";
+import AddStockModal from "./AddStockModal";
+import { toast } from "react-hot-toast";
 
 interface Stock {
   id: number;
@@ -38,55 +42,63 @@ interface Props {
   onClose: () => void;
 }
 
-const PortfolioDetail: React.FC<Props> = ({ portfolio: initialPortfolio, onClose }) => {
+const PortfolioDetail: React.FC<Props> = ({
+  portfolio: initialPortfolio,
+  onClose,
+}) => {
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'delete';
+    type: "delete";
     stock: Stock;
   } | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [updateStock] = useMutation(UPDATE_STOCK, {
-    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }]
+    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }],
   });
 
   const [deleteStock] = useMutation(DELETE_STOCK, {
-    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }]
+    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }],
   });
 
   const [deletePortfolio] = useMutation(DELETE_PORTFOLIO, {
-    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }]
+    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }],
   });
 
   const { data, refetch } = useQuery(GET_ACCOUNT_PORTFOLIOS);
 
-  const portfolio = data?.getAccountPortfolios.find(
-    (p: any) => p.account === initialPortfolio.account
-  ) || initialPortfolio;
+  const portfolio =
+    data?.getAccountPortfolios.find(
+      (p: any) => p.account === initialPortfolio.account
+    ) || initialPortfolio;
 
   const handleEdit = (stock: Stock) => {
     setEditingStock(stock);
   };
 
-  const handleSave = async (values: { quantity: number; avgPrice: number; assetClass: string }) => {
+  const handleSave = async (values: {
+    quantity: number;
+    avgPrice: number;
+    assetClass: string;
+  }) => {
     if (!editingStock) return;
 
     try {
       await updateStock({
         variables: {
           id: editingStock.id,
-          input: values
-        }
+          input: values,
+        },
       });
       setEditingStock(null);
     } catch (error) {
-      console.error('Failed to update stock:', error);
+      console.error("Failed to update stock:", error);
     }
   };
 
   const handleDelete = (stock: Stock) => {
-    setConfirmAction({ type: 'delete', stock });
+    setConfirmAction({ type: "delete", stock });
   };
 
   const handleConfirm = async () => {
@@ -94,27 +106,27 @@ const PortfolioDetail: React.FC<Props> = ({ portfolio: initialPortfolio, onClose
 
     try {
       await deleteStock({
-        variables: { id: confirmAction.stock.id }
+        variables: { id: confirmAction.stock.id },
       });
-      toast.success('자산이 삭제되었습니다');
+      toast.success("자산이 삭제되었습니다");
       setConfirmAction(null);
       setEditingStock(null);
     } catch (error) {
-      console.error('Failed to delete stock:', error);
-      toast.error('자산 삭제에 실패했습니다');
+      console.error("Failed to delete stock:", error);
+      toast.error("자산 삭제에 실패했습니다");
     }
   };
 
   const handlePortfolioDelete = async () => {
     try {
       await deletePortfolio({
-        variables: { account: portfolio.account }
+        variables: { account: portfolio.account },
       });
-      toast.success('포트폴리오가 삭제되었습니다');
+      toast.success("포트폴리오가 삭제되었습니다");
       onClose();
     } catch (error) {
-      console.error('Failed to delete portfolio:', error);
-      toast.error('포트폴리오 삭제에 실패했습니다');
+      console.error("Failed to delete portfolio:", error);
+      toast.error("포트폴리오 삭제에 실패했습니다");
     }
   };
 
@@ -126,16 +138,19 @@ const PortfolioDetail: React.FC<Props> = ({ portfolio: initialPortfolio, onClose
     <Modal onClose={onClose}>
       <Container>
         <Header>
-          <Title>
-            {portfolio.description || portfolio.account} 포트폴리오
-          </Title>
+          <Title>{portfolio.description || portfolio.account} 포트폴리오</Title>
           <ButtonGroup>
             <Button onClick={() => setIsAddModalOpen(true)}>자산 추가</Button>
             <Button onClick={handleRefresh}>
               <RefreshIcon>🔄</RefreshIcon>
               새로고침
             </Button>
-            <Button onClick={() => setIsDeleteModalOpen(true)} style={{ background: '#dc3545' }}>포트폴리오 삭제</Button>
+            <Button
+              onClick={() => setIsDeleteModalOpen(true)}
+              style={{ background: "#dc3545" }}
+            >
+              포트폴리오 삭제
+            </Button>
             <Button onClick={onClose}>닫기</Button>
           </ButtonGroup>
         </Header>
@@ -195,7 +210,11 @@ const PortfolioDetail: React.FC<Props> = ({ portfolio: initialPortfolio, onClose
 
         {isDeleteModalOpen && (
           <ConfirmDialog>
-            <p>정말 이 포트폴리오를 삭제하시겠습니까?<br/>포트폴리오의 모든 자산이 함께 삭제됩니다.</p>
+            <p>
+              정말 이 포트폴리오를 삭제하시겠습니까?
+              <br />
+              포트폴리오의 모든 자산이 함께 삭제됩니다.
+            </p>
             <ButtonGroup>
               <Button onClick={handlePortfolioDelete}>확인</Button>
               <Button onClick={() => setIsDeleteModalOpen(false)}>취소</Button>
@@ -238,7 +257,7 @@ const ConfirmDialog = styled.div`
   background: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
   z-index: 1100;
 `;
@@ -279,7 +298,7 @@ const Value = styled.span`
 const ReturnValue = styled.span<{ positive: boolean }>`
   font-size: 18px;
   font-weight: bold;
-  color: ${props => props.positive ? '#e31b23' : '#1261c4'};
+  color: ${(props) => (props.positive ? "#e31b23" : "#1261c4")};
 `;
 
 const RefreshIcon = styled.span`

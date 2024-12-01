@@ -8,10 +8,10 @@ import {
   GET_SALARIES,
   GET_SALARY_SUMMARY,
 } from "../graphql/queries";
-import AddIncomeModal from "../components/AddIncomeModal";
-import AddSalaryModal from "../components/AddSalaryModal";
-import EditIncomeModal from "../components/EditIncomeModal";
-import EditSalaryModal from "../components/EditSalaryModal";
+import AddIncomeModal from "../components/income/AddIncomeModal";
+import AddSalaryModal from "../components/income/AddSalaryModal";
+import EditIncomeModal from "../components/income/EditIncomeModal";
+import EditSalaryModal from "../components/income/EditSalaryModal";
 
 const Income = () => {
   const [selectedYear, setSelectedYear] = useState<number>(

@@ -1,31 +1,31 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useMutation } from '@apollo/client';
-import { toast } from 'react-toastify';
-import { ADD_DIVIDEND } from '../graphql/mutations';
-import { GET_DIVIDENDS } from '../graphql/queries';
-import Modal from './common/Modal';
-import Button from './common/Button';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useMutation } from "@apollo/client";
+import { toast } from "react-hot-toast";
+import { ADD_DIVIDEND } from "../../graphql/mutations";
+import { GET_DIVIDENDS } from "../../graphql/queries";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
 
 interface Props {
   onClose: () => void;
 }
 
 const AddDividendModal: React.FC<Props> = ({ onClose }) => {
-  const [symbol, setSymbol] = useState('');
+  const [symbol, setSymbol] = useState("");
   const [amount, setAmount] = useState(0);
-  const [currency, setCurrency] = useState('KRW');
+  const [currency, setCurrency] = useState("KRW");
 
   const [addDividend] = useMutation(ADD_DIVIDEND, {
     refetchQueries: [{ query: GET_DIVIDENDS }],
     onCompleted: () => {
-      toast.success('배당금이 추가되었습니다');
+      toast.success("배당금이 추가되었습니다");
       onClose();
     },
     onError: (error) => {
-      console.error('Failed to add dividend:', error);
-      toast.error('배당금 추가에 실패했습니다');
-    }
+      console.error("Failed to add dividend:", error);
+      toast.error("배당금 추가에 실패했습니다");
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,9 +35,9 @@ const AddDividendModal: React.FC<Props> = ({ onClose }) => {
         input: {
           symbol,
           currency,
-          amount
-        }
-      }
+          amount,
+        },
+      },
     });
   };
 
@@ -50,7 +50,7 @@ const AddDividendModal: React.FC<Props> = ({ onClose }) => {
             <Label>종목코드</Label>
             <Input
               value={symbol}
-              onChange={e => setSymbol(e.target.value)}
+              onChange={(e) => setSymbol(e.target.value)}
               placeholder="예: AAPL"
               required
             />
@@ -62,20 +62,25 @@ const AddDividendModal: React.FC<Props> = ({ onClose }) => {
               step="0.01"
               min="0"
               value={amount}
-              onChange={e => setAmount(parseFloat(e.target.value))}
+              onChange={(e) => setAmount(parseFloat(e.target.value))}
               required
             />
           </FormGroup>
           <FormGroup>
             <Label>통화</Label>
-            <Select value={currency} onChange={e => setCurrency(e.target.value)}>
+            <Select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+            >
               <option value="KRW">KRW</option>
               <option value="USD">USD</option>
             </Select>
           </FormGroup>
           <ButtonGroup>
             <Button type="submit">추가</Button>
-            <Button type="button" onClick={onClose}>취소</Button>
+            <Button type="button" onClick={onClose}>
+              취소
+            </Button>
           </ButtonGroup>
         </Form>
       </Container>
@@ -132,4 +137,4 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
-export default AddDividendModal; 
+export default AddDividendModal;

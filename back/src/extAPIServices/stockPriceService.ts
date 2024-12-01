@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { TokenService } from './tokenService';
-import { ExchangeRateService } from './exchangeRateService';
 import { PrismaClient } from '@prisma/client';
+import { globalState } from '../resolvers';
 
 const prisma = new PrismaClient();
 
@@ -52,14 +51,7 @@ interface KoreaStockPriceResponse {
 
 export class StockPriceService {
   private static instance: StockPriceService;
-  private tokenService: TokenService;
-  private exchangeRateService: ExchangeRateService;
   private readonly BASE_URL = 'https://openapi.koreainvestment.com:9443';
-
-  private constructor() {
-    this.tokenService = TokenService.getInstance();
-    this.exchangeRateService = ExchangeRateService.getInstance();
-  }
 
   static getInstance(): StockPriceService {
     if (!StockPriceService.instance) {
@@ -107,8 +99,9 @@ export class StockPriceService {
    * @returns 주식 가격 상세 정보
    */
   async getStockPrice(symbol: string, excd: string): Promise<StockPriceDetail> {
+    const exchangeRate = globalState.exchangeRate.rate;
+
     if (symbol.endsWith('-KRW') || symbol.endsWith('-USD')) {
-      const exchangeRate = await this.exchangeRateService.getExchangeRate();
       return {
         currentPrice: symbol.endsWith('-USD') ? exchangeRate: 1,
         change: 0,
@@ -135,7 +128,7 @@ export class StockPriceService {
    */
   private async getKoreanStockPrice(symbol: string): Promise<StockPriceDetail> {
     try {
-      const token = await this.tokenService.getToken();
+      const token = globalState.token.accessToken;
       
       const response = await axios.get<KoreaStockPriceResponse>(
         `${this.BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price`,
@@ -185,7 +178,7 @@ export class StockPriceService {
    */
   private async getForeignStockPrice(symbol: string, excd: string): Promise<StockPriceDetail> {
     try {
-      const token = await this.tokenService.getToken();
+      const token = globalState.token.accessToken;
       
       const response = await axios.get<ForeignStockPriceResponse>(
         `${this.BASE_URL}/uapi/overseas-price/v1/quotations/price`,

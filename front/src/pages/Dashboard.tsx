@@ -1,14 +1,17 @@
 import React from "react";
 import { useQuery } from "@apollo/client";
 import styled from "styled-components";
-import { GET_DASHBOARD_DATA, GET_EXCHANGE_RATE } from "../graphql/queries";
+import {
+  GET_DASHBOARD_DATA,
+  GET_EXCHANGE_RATE_FORCE,
+} from "../graphql/queries";
 import { formatNumber } from "../utils/numberFormat";
 import { LineChart, Treemap } from "../components/charts";
 import RefreshButton from "../components/common/RefreshButton";
 
 const Dashboard = () => {
   const { data, loading, error } = useQuery(GET_DASHBOARD_DATA);
-  const { refetch: refetchExchangeRate } = useQuery(GET_EXCHANGE_RATE);
+  const { refetch: refetchExchangeRate } = useQuery(GET_EXCHANGE_RATE_FORCE);
   const dashboardData = data?.getDashboardData;
 
   const handleRefreshExchangeRate = async () => {

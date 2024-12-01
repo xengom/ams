@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { PortfolioService } from './portfolioService';
+import { globalState } from '../resolvers';
 import cron from 'node-cron';
 
 const prisma = new PrismaClient();
@@ -77,10 +78,9 @@ export class AssetHistoryService {
 
   private async calculateTotalDividendReturn(): Promise<number> {
     const dividends = await prisma.dividend.findMany();
-    const exchangeRate = await prisma.exchangeRate.findFirst();
     return dividends.reduce((sum: number, div) => {
         const amountInKRW = div.currency === 'USD' 
-          ? Number(div.amount) * exchangeRate.rate
+          ? Number(div.amount) * globalState.exchangeRate.rate
           : Number(div.amount);
         return sum + amountInKRW;
       }, 0);

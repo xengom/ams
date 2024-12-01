@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useMutation } from '@apollo/client';
-import { toast } from 'react-toastify';
-import { CREATE_PORTFOLIO } from '../graphql/mutations';
-import { GET_ACCOUNT_PORTFOLIOS } from '../graphql/queries';
-import Modal from './common/Modal';
-import Button from './common/Button';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useMutation } from "@apollo/client";
+import { toast } from "react-toastify";
+import { CREATE_PORTFOLIO } from "../../graphql/mutations";
+import { GET_ACCOUNT_PORTFOLIOS } from "../../graphql/queries";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
 
 interface Props {
   onClose: () => void;
 }
 
 const AddPortfolioModal: React.FC<Props> = ({ onClose }) => {
-  const [account, setAccount] = useState('');
-  const [description, setDescription] = useState('');
+  const [account, setAccount] = useState("");
+  const [description, setDescription] = useState("");
 
   const [createPortfolio] = useMutation(CREATE_PORTFOLIO, {
-    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }]
+    refetchQueries: [{ query: GET_ACCOUNT_PORTFOLIOS }],
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,15 +26,15 @@ const AddPortfolioModal: React.FC<Props> = ({ onClose }) => {
         variables: {
           input: {
             account,
-            description
-          }
-        }
+            description,
+          },
+        },
       });
-      toast.success('포트폴리오가 추가되었습니다');
+      toast.success("포트폴리오가 추가되었습니다");
       onClose();
     } catch (error) {
-      console.error('Failed to create portfolio:', error);
-      toast.error('포트폴리오 추가에 실패했습니다');
+      console.error("Failed to create portfolio:", error);
+      toast.error("포트폴리오 추가에 실패했습니다");
     }
   };
 
@@ -45,9 +45,9 @@ const AddPortfolioModal: React.FC<Props> = ({ onClose }) => {
         <Form onSubmit={handleSubmit}>
           <FormGroup>
             <Label>계좌 종류</Label>
-            <Select 
-              value={account} 
-              onChange={e => setAccount(e.target.value)}
+            <Select
+              value={account}
+              onChange={(e) => setAccount(e.target.value)}
               required
             >
               <option value="">선택하세요</option>
@@ -64,13 +64,15 @@ const AddPortfolioModal: React.FC<Props> = ({ onClose }) => {
             <Label>설명 (선택사항)</Label>
             <Input
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="포트폴리오에 대한 설명을 입력하세요"
             />
           </FormGroup>
           <ButtonGroup>
             <Button type="submit">추가</Button>
-            <Button type="button" onClick={onClose}>취소</Button>
+            <Button type="button" onClick={onClose}>
+              취소
+            </Button>
           </ButtonGroup>
         </Form>
       </Container>
@@ -127,4 +129,4 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
-export default AddPortfolioModal; 
+export default AddPortfolioModal;

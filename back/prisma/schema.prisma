@@ -58,26 +58,10 @@ model stock {
   updatedAt    DateTime   @updatedAt
 }
 
-model ExchangeRate {
-  id        Int      @id @default(autoincrement())
-  currency  String   @default("USD")
-  rate      Float
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([currency])
-}
-
 model portfolio {
   id          Int      @id @default(autoincrement())
   account     Account
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model token {
-  id          Int      @id @default(autoincrement())
-  accessToken String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -122,4 +106,38 @@ model assetHistory {
   pureReturn       Float // 배당제외수익
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+model regularPayment {
+  id          Int      @id @default(autoincrement())
+  type        String // 'monthly' 또는 'yearly'
+  detail      String
+  method      String
+  amount      Float
+  paymentDate Int
+  currency    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model planItem {
+  id        Int      @id @default(autoincrement())
+  category  String // 'FIXED', 'LIVING', 'SAVING', 'INVESTMENT'
+  detail    String
+  amount    Float
+  ratio     Float
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model transferPlan {
+  id           Int      @id @default(autoincrement())
+  item         String   @unique
+  transferDate Int
+  amount       Float
+  bank         String
+  note         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

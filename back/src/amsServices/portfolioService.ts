@@ -1,16 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import { StockPriceService } from '../extAPIServices/stockPriceService';
-import { ExchangeRateService } from '../extAPIServices/exchangeRateService';
+import { globalState } from '../resolvers';
 
 const prisma = new PrismaClient();
 
 export class PortfolioService {
   private static instance: PortfolioService;
   private stockPriceService: StockPriceService;
-  private exchangeRateService: ExchangeRateService;
+
   private constructor() {
     this.stockPriceService = StockPriceService.getInstance();
-    this.exchangeRateService = ExchangeRateService.getInstance();
   }
 
   static getInstance(): PortfolioService {
@@ -23,7 +22,7 @@ export class PortfolioService {
   async getAccountPortfolios() {
     try {
       const portfolios = await prisma.portfolio.findMany();
-      const exchangeRate = await this.exchangeRateService.getExchangeRate();
+      const exchangeRate = globalState.exchangeRate.rate;
 
       const result = await Promise.all(portfolios.map(async (portfolio) => {
         const stocks = await prisma.stock.findMany({

@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useMutation } from "@apollo/client";
 import { toast } from "react-toastify";
-import { ADD_SALARY } from "../graphql/mutations";
-import { GET_SALARIES, GET_SALARY_SUMMARY } from "../graphql/queries";
-import Modal from "./common/Modal";
-import Button from "./common/Button";
+import { ADD_SALARY } from "../../graphql/mutations";
+import { GET_SALARIES, GET_SALARY_SUMMARY } from "../../graphql/queries";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
 
 interface Props {
   onClose: () => void;

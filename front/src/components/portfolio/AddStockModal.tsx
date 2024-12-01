@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { useMutation, useQuery } from '@apollo/client';
-import { toast } from 'react-toastify';
-import { ADD_STOCK } from '../graphql/mutations';
-import { GET_ACCOUNT_PORTFOLIOS, GET_PORTFOLIO_SUMMARY, GET_EXCHANGE_RATE } from '../graphql/queries';
-import Modal from './common/Modal';
-import Button from './common/Button';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { useMutation, useQuery } from "@apollo/client";
+import { toast } from "react-toastify";
+import { ADD_STOCK } from "../../graphql/mutations";
+import {
+  GET_ACCOUNT_PORTFOLIOS,
+  GET_PORTFOLIO_SUMMARY,
+  GET_EXCHANGE_RATE,
+} from "../../graphql/queries";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
 
 interface Props {
   account: string;
@@ -13,36 +17,36 @@ interface Props {
 }
 
 const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
-  const [symbol, setSymbol] = useState('');
-  const [name, setName] = useState('');
+  const [symbol, setSymbol] = useState("");
+  const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [avgPrice, setAvgPrice] = useState(0);
-  const [currency, setCurrency] = useState('KRW');
-  const [assetClass, setAssetClass] = useState('KR_EQUITY');
-  const [excd, setExcd] = useState('KRX');
+  const [currency, setCurrency] = useState("KRW");
+  const [assetClass, setAssetClass] = useState("KR_EQUITY");
+  const [excd, setExcd] = useState("KRX");
 
-  const isCashSymbol = symbol.endsWith('-USD') || symbol.endsWith('-KRW');
-  const isCashAsset = assetClass === 'CASH' || isCashSymbol;
+  const isCashSymbol = symbol.endsWith("-USD") || symbol.endsWith("-KRW");
+  const isCashAsset = assetClass === "CASH" || isCashSymbol;
 
   const { data: exchangeRateData } = useQuery(GET_EXCHANGE_RATE);
 
   const [addStock] = useMutation(ADD_STOCK, {
     refetchQueries: [
       { query: GET_ACCOUNT_PORTFOLIOS },
-      { query: GET_PORTFOLIO_SUMMARY }
+      { query: GET_PORTFOLIO_SUMMARY },
     ],
     onCompleted: () => {
-      toast.success('자산이 추가되었습니다');
+      toast.success("자산이 추가되었습니다");
       onClose();
     },
     onError: (error) => {
-      console.error('Failed to add stock:', error);
-      toast.error('자산 추가에 실패했습니다');
-    }
+      console.error("Failed to add stock:", error);
+      toast.error("자산 추가에 실패했습니다");
+    },
   });
 
   React.useEffect(() => {
-    if (symbol.endsWith('-USD') && exchangeRateData?.getExchangeRate) {
+    if (symbol.endsWith("-USD") && exchangeRateData?.getExchangeRate) {
       setAvgPrice(exchangeRateData.getExchangeRate);
     }
   }, [symbol, exchangeRateData]);
@@ -55,19 +59,21 @@ const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
           symbol,
           name,
           quantity,
-          avgPrice: symbol.endsWith('-USD') ? exchangeRateData?.getExchangeRate || 0 : avgPrice,
+          avgPrice: symbol.endsWith("-USD")
+            ? exchangeRateData?.getExchangeRate || 0
+            : avgPrice,
           currency,
           assetClass,
           account,
-          excd: isCashAsset ? null : (isCashSymbol ? null : excd)
-        }
-      }
+          excd: isCashAsset ? null : isCashSymbol ? null : excd,
+        },
+      },
     });
   };
 
   React.useEffect(() => {
     if (isCashSymbol) {
-      setAssetClass('CASH');
+      setAssetClass("CASH");
     }
   }, [isCashSymbol]);
 
@@ -80,7 +86,7 @@ const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
             <Label>종목코드</Label>
             <Input
               value={symbol}
-              onChange={e => setSymbol(e.target.value)}
+              onChange={(e) => setSymbol(e.target.value)}
               placeholder="예: 005930"
               required
             />
@@ -89,7 +95,7 @@ const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
             <Label>종목명</Label>
             <Input
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               placeholder="예: 삼성전자"
               required
             />
@@ -101,7 +107,7 @@ const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
               step={isCashAsset ? "0.01" : "1"}
               min="0"
               value={quantity}
-              onChange={e => setQuantity(parseFloat(e.target.value))}
+              onChange={(e) => setQuantity(parseFloat(e.target.value))}
               required
             />
           </FormGroup>
@@ -109,23 +115,29 @@ const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
             <Label>평균단가</Label>
             <Input
               type="number"
-              step={currency === 'USD' ? 0.01 : 1}
+              step={currency === "USD" ? 0.01 : 1}
               value={isCashSymbol ? 1 : avgPrice}
-              onChange={e => setAvgPrice(parseFloat(e.target.value))}
+              onChange={(e) => setAvgPrice(parseFloat(e.target.value))}
               required={!isCashSymbol}
               disabled={isCashSymbol}
             />
           </FormGroup>
           <FormGroup>
             <Label>통화</Label>
-            <Select value={currency} onChange={e => setCurrency(e.target.value)}>
+            <Select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+            >
               <option value="KRW">KRW</option>
               <option value="USD">USD</option>
             </Select>
           </FormGroup>
           <FormGroup>
             <Label>자산구분</Label>
-            <Select value={assetClass} onChange={e => setAssetClass(e.target.value)}>
+            <Select
+              value={assetClass}
+              onChange={(e) => setAssetClass(e.target.value)}
+            >
               <option value="KR_EQUITY">한국 주식</option>
               <option value="US_EQUITY">미국 주식</option>
               <option value="BOND">채권</option>
@@ -136,7 +148,7 @@ const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
           {!isCashSymbol && (
             <FormGroup>
               <Label>거래소</Label>
-              <Select value={excd} onChange={e => setExcd(e.target.value)}>
+              <Select value={excd} onChange={(e) => setExcd(e.target.value)}>
                 <option value="KRX">한국거래소</option>
                 <option value="NYS">뉴욕</option>
                 <option value="NAS">나스닥</option>
@@ -146,7 +158,9 @@ const AddStockModal: React.FC<Props> = ({ account, onClose }) => {
           )}
           <ButtonGroup>
             <Button type="submit">추가</Button>
-            <Button type="button" onClick={onClose}>취소</Button>
+            <Button type="button" onClick={onClose}>
+              취소
+            </Button>
           </ButtonGroup>
         </Form>
       </Container>
@@ -203,4 +217,4 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
-export default AddStockModal; 
+export default AddStockModal;

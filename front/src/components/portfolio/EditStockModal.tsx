@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import Modal from './common/Modal';
-import Button from './common/Button';
+import React, { useState } from "react";
+import styled from "styled-components";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
 
 interface Props {
   stock: {
@@ -13,18 +13,28 @@ interface Props {
     assetClass: string;
     currency: string;
   };
-  onSave: (values: { quantity: number; avgPrice: number; assetClass: string }) => void;
+  onSave: (values: {
+    quantity: number;
+    avgPrice: number;
+    assetClass: string;
+  }) => void;
   onDelete: () => void;
   onClose: () => void;
 }
 
-const EditStockModal: React.FC<Props> = ({ stock, onSave, onDelete, onClose }) => {
+const EditStockModal: React.FC<Props> = ({
+  stock,
+  onSave,
+  onDelete,
+  onClose,
+}) => {
   const [quantity, setQuantity] = useState(stock.quantity);
   const [avgPrice, setAvgPrice] = useState(stock.avgPrice);
   const [assetClass, setAssetClass] = useState(stock.assetClass);
 
-  const isCashSymbol = stock.symbol.endsWith('-USD') || stock.symbol.endsWith('-KRW');
-  const isCashAsset = assetClass === 'CASH' || isCashSymbol;
+  const isCashSymbol =
+    stock.symbol.endsWith("-USD") || stock.symbol.endsWith("-KRW");
+  const isCashAsset = assetClass === "CASH" || isCashSymbol;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +57,7 @@ const EditStockModal: React.FC<Props> = ({ stock, onSave, onDelete, onClose }) =
               step={isCashAsset ? "0.01" : "1"}
               min="0"
               value={quantity}
-              onChange={e => setQuantity(parseFloat(e.target.value))}
+              onChange={(e) => setQuantity(parseFloat(e.target.value))}
               required
             />
           </FormGroup>
@@ -55,9 +65,9 @@ const EditStockModal: React.FC<Props> = ({ stock, onSave, onDelete, onClose }) =
             <Label>평균단가 ({stock.currency})</Label>
             <Input
               type="number"
-              step={stock.currency === 'USD' ? 0.01 : 1}
+              step={stock.currency === "USD" ? 0.01 : 1}
               value={isCashSymbol ? 1 : avgPrice}
-              onChange={e => setAvgPrice(parseFloat(e.target.value))}
+              onChange={(e) => setAvgPrice(parseFloat(e.target.value))}
               required={!isCashSymbol}
               disabled={isCashSymbol}
             />
@@ -66,7 +76,7 @@ const EditStockModal: React.FC<Props> = ({ stock, onSave, onDelete, onClose }) =
             <Label>자산 구분</Label>
             <Select
               value={assetClass}
-              onChange={e => setAssetClass(e.target.value)}
+              onChange={(e) => setAssetClass(e.target.value)}
               required
             >
               <option value="US_EQUITY">미국 주식</option>
@@ -78,8 +88,16 @@ const EditStockModal: React.FC<Props> = ({ stock, onSave, onDelete, onClose }) =
           </FormGroup>
           <ButtonGroup>
             <Button type="submit">저장</Button>
-            <Button type="button" onClick={onDelete} style={{ background: '#dc3545' }}>삭제</Button>
-            <Button type="button" onClick={onClose}>취소</Button>
+            <Button
+              type="button"
+              onClick={onDelete}
+              style={{ background: "#dc3545" }}
+            >
+              삭제
+            </Button>
+            <Button type="button" onClick={onClose}>
+              취소
+            </Button>
           </ButtonGroup>
         </Form>
       </Container>
@@ -153,4 +171,4 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
-export default EditStockModal; 
+export default EditStockModal;

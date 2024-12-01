@@ -193,10 +193,33 @@ export const typeDefs = gql`
     note: String
   }
 
+  input RegularPaymentInput {
+    detail: String!
+    method: String!
+    amount: Float!
+    paymentDate: Int!
+    currency: String!
+  }
+
+  input PlanItemInput {
+    category: String!
+    detail: String!
+    amount: Float!
+    note: String
+  }
+
+  input TransferPlanInput {
+    item: String!
+    transferDate: Int!
+    amount: Float!
+    bank: String!
+    note: String
+  }
+
   type Query {
     getStockPrice(symbol: String!, excd: String!): StockPriceDetail!
     getStockPrices(stocks: [StockInput!]!): [StockPrice!]!
-    getExchangeRate: Float!
+    getExchangeRate(force: Boolean): Float!
     getAccountPortfolios: [AccountPortfolio!]!
     getDividends(year: Int): [Dividend!]!
     getDividendSummary(year: Int): DividendSummary!
@@ -205,6 +228,11 @@ export const typeDefs = gql`
     getSalarySummary(year: Int): SalarySummary!
     getAssetHistory(startDate: String, endDate: String): [AssetHistory!]!
     getDashboardData: DashboardData!
+    getMonthlyPayments: [RegularPayment!]!
+    getYearlyPayments: [RegularPayment!]!
+    getPlanItems: [PlanItem!]!
+    getTransferPlans: [TransferPlan!]!
+    getLatestSalary: Float!
   }
 
   type Mutation {
@@ -222,6 +250,16 @@ export const typeDefs = gql`
     updateSalary(id: Int!, input: UpdateSalaryInput!): Salary!
     deleteSalary(id: Int!): Salary!
     refreshExchangeRate: Float!
+    addRegularPayment(type: String!, input: RegularPaymentInput!): RegularPayment!
+    updateRegularPayment(id: ID!, input: RegularPaymentInput!): RegularPayment!
+    deleteRegularPayment(id: ID!): Boolean!
+    
+    addPlanItem(input: PlanItemInput!): PlanItem!
+    updatePlanItem(id: ID!, input: PlanItemInput!): PlanItem!
+    deletePlanItem(id: ID!): Boolean!
+    
+    addTransferPlan(input: TransferPlanInput!): TransferPlan!
+    updateTransferPlan(item: String!, input: UpdateTransferPlanInput!): TransferPlan!
   }
 
   type TreemapData {
@@ -253,5 +291,38 @@ export const typeDefs = gql`
     history: [AssetHistory!]!
     assetClassGroups: [TreemapData!]!
     accountGroups: [TreemapData!]!
+  }
+
+  type RegularPayment {
+    id: ID!
+    detail: String!
+    method: String!
+    amount: Float!
+    paymentDate: Int!
+    currency: String!
+  }
+
+  type PlanItem {
+    id: ID!
+    category: String!
+    detail: String!
+    amount: Float!
+    ratio: Float!
+    note: String
+  }
+
+  type TransferPlan {
+    id: ID!
+    item: String!
+    transferDate: Int!
+    amount: Float!
+    bank: String!
+    note: String
+  }
+
+  input UpdateTransferPlanInput {
+    transferDate: Int
+    bank: String
+    note: String
   }
 `;

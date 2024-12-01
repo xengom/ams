@@ -1,63 +1,53 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import React from "react";
+import { Menu } from "antd";
+import { Link, useLocation } from "react-router-dom";
+import type { MenuProps } from "antd";
 
-const Navigation = () => {
+const Navigation: React.FC = () => {
   const location = useLocation();
 
+  const items: MenuProps["items"] = [
+    {
+      key: "/",
+      label: <Link to="/">Dashboard</Link>,
+    },
+    {
+      key: "/portfolio",
+      label: <Link to="/portfolio">Portfolio</Link>,
+    },
+    {
+      key: "/dividend",
+      label: <Link to="/dividend">Dividend</Link>,
+    },
+    {
+      key: "/income",
+      label: <Link to="/income">Income</Link>,
+    },
+    {
+      key: "/plan",
+      label: <Link to="/plan">Plan</Link>,
+    },
+  ];
+
   return (
-    <Nav>
-      <NavList>
-        <NavItem $active={location.pathname === '/'}>
-          <NavLink to="/">Home</NavLink>
-        </NavItem>
-        <NavItem $active={location.pathname === '/portfolios'}>
-          <NavLink to="/portfolios">Portfolios</NavLink>
-        </NavItem>
-        <NavItem $active={location.pathname === '/dividend'}>
-          <NavLink to="/dividend">Dividend</NavLink>
-        </NavItem>
-        <NavItem $active={location.pathname === '/history'}>
-          <NavLink to="/history">History</NavLink>
-        </NavItem>
-        <NavItem $active={location.pathname === '/income'}>
-          <NavLink to="/income">Income Mgmt.</NavLink>
-        </NavItem>
-        <NavItem $active={location.pathname === '/plan'}>
-          <NavLink to="/plan">Plan</NavLink>
-        </NavItem>
-      </NavList>
-    </Nav>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backgroundColor: "white",
+        borderBottom: "1px solid #f0f0f0",
+      }}
+    >
+      <Menu
+        mode="horizontal"
+        selectedKeys={[location.pathname]}
+        items={items}
+      />
+    </div>
   );
 };
 
-const Nav = styled.nav`
-  background: white;
-  padding: 0 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-`;
-
-const NavList = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 20px;
-`;
-
-const NavItem = styled.li<{ $active: boolean }>`
-  padding: 15px 0;
-  border-bottom: 2px solid ${props => props.$active ? '#1a73e8' : 'transparent'};
-`;
-
-const NavLink = styled(Link)`
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  
-  &:hover {
-    color: #1a73e8;
-  }
-`;
-
-export default Navigation; 
+export default Navigation;

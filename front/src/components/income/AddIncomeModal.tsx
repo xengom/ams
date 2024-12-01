@@ -2,71 +2,44 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useMutation } from "@apollo/client";
 import { toast } from "react-toastify";
-import { UPDATE_INCOME, DELETE_INCOME } from "../graphql/mutations";
-import { GET_INCOMES, GET_SALARY_SUMMARY } from "../graphql/queries";
-import Modal from "./common/Modal";
-import Button from "./common/Button";
+import { ADD_INCOME } from "../../graphql/mutations";
+import { GET_INCOMES, GET_SALARY_SUMMARY } from "../../graphql/queries";
+import Modal from "../common/Modal";
+import Button from "../common/Button";
 
 interface Props {
-  income: {
-    id: number;
-    date: string;
-    type: string;
-    amount: number;
-  };
   onClose: () => void;
 }
 
-const EditIncomeModal: React.FC<Props> = ({ income, onClose }) => {
-  const [date, setDate] = useState(
-    income.date.slice(0, 4) + "-" + income.date.slice(4)
-  ); // YYYY-MM
-  const [type, setType] = useState(income.type);
-  const [amount, setAmount] = useState(income.amount);
+const AddIncomeModal: React.FC<Props> = ({ onClose }) => {
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+  const [type, setType] = useState("INVESTMENT");
+  const [amount, setAmount] = useState(0);
 
-  const [updateIncome] = useMutation(UPDATE_INCOME, {
+  const [addIncome] = useMutation(ADD_INCOME, {
     refetchQueries: [
       { query: GET_INCOMES },
       {
         query: GET_SALARY_SUMMARY,
-        variables: { year: new Date().getFullYear() },
+        variables: { year: new Date().getFullYear() }, // 현재 연도의 데이터 갱신
       },
     ],
     onCompleted: () => {
-      toast.success("입금 내역이 수정되었습니다");
+      toast.success("입금 내역이 추가되었습니다");
       onClose();
     },
     onError: (error) => {
-      console.error("Failed to update income:", error);
-      toast.error("입금 내역 수정에 실패했습니다");
-    },
-  });
-
-  const [deleteIncome] = useMutation(DELETE_INCOME, {
-    refetchQueries: [
-      { query: GET_INCOMES },
-      {
-        query: GET_SALARY_SUMMARY,
-        variables: { year: new Date().getFullYear() },
-      },
-    ],
-    onCompleted: () => {
-      toast.success("입금 내역이 삭제되었습니다");
-      onClose();
-    },
-    onError: (error) => {
-      console.error("Failed to delete income:", error);
-      toast.error("입금 내역 삭제에 실패했습니다");
+      console.error("Failed to add income:", error);
+      toast.error("입금 내역 추가에 실패했습니다");
     },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateIncome({
+    await addIncome({
       variables: {
-        id: income.id,
         input: {
-          date: date.replace("-", ""),
+          date: date.replace("-", ""), // YYYYMM 형식으로 변환
           type,
           amount: parseInt(amount.toString()),
         },
@@ -74,18 +47,10 @@ const EditIncomeModal: React.FC<Props> = ({ income, onClose }) => {
     });
   };
 
-  const handleDelete = async () => {
-    if (window.confirm("정말 삭제하시겠습니까?")) {
-      await deleteIncome({
-        variables: { id: income.id },
-      });
-    }
-  };
-
   return (
     <Modal onClose={onClose}>
       <Container>
-        <Title>입금 내역 수정</Title>
+        <Title>입금 내역 추가</Title>
         <Form onSubmit={handleSubmit}>
           <FormGroup>
             <Label>날짜</Label>
@@ -116,14 +81,7 @@ const EditIncomeModal: React.FC<Props> = ({ income, onClose }) => {
             />
           </FormGroup>
           <ButtonGroup>
-            <Button type="submit">저장</Button>
-            <Button
-              type="button"
-              onClick={handleDelete}
-              style={{ background: "#dc3545" }}
-            >
-              삭제
-            </Button>
+            <Button type="submit">추가</Button>
             <Button type="button" onClick={onClose}>
               취소
             </Button>
@@ -183,4 +141,4 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
-export default EditIncomeModal;
+export default AddIncomeModal;

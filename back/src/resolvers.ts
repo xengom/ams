@@ -1,10 +1,56 @@
 import { PrismaClient, AssetClass, Account, Currency, Exchange, IncomeType } from '@prisma/client';
 import { StockPriceService } from './extAPIServices/stockPriceService';
 import { PortfolioService } from './amsServices/portfolioService';
-import { ExchangeRateService } from './extAPIServices/exchangeRateService';
 import { AssetHistoryService } from './amsServices/assetHistoryService';
+import { getGlobalStateService } from './extAPIServices/getGlobalStateService';
 
 const prisma = new PrismaClient();
+const globalStateService = getGlobalStateService.getInstance();
+
+// 전역 상태 타입 정의
+interface GlobalState {
+  token: {
+    accessToken: string;
+    lastUpdatedAt: Date | null;
+  };
+  exchangeRate: {
+    rate: number;
+    lastUpdatedAt: Date | null;
+  };
+}
+
+// 전역 상태 초기화
+const globalState: GlobalState = {
+  token: {
+    accessToken: '',
+    lastUpdatedAt: null
+  },
+  exchangeRate: {
+    rate: 1300,
+    lastUpdatedAt: null
+  }
+};
+
+// 토큰 업데이트 함수
+const updateToken = (newToken: string) => {
+  globalState.token = {
+    accessToken: newToken,
+    lastUpdatedAt: new Date()
+  };
+};
+
+// 환율 업데이트 함수
+const updateExchangeRate = (newRate: number) => {
+  globalState.exchangeRate = {
+    rate: newRate,
+    lastUpdatedAt: new Date()
+  };
+};
+
+// 전역 상태 접근 함수들
+const getGlobalStates = (type: string | number) => {
+  return type === 'token' ? globalState.token : globalState.exchangeRate;
+};
 
 export const resolvers = {
   Query: {
@@ -39,9 +85,8 @@ export const resolvers = {
      * 환율 조회
      * @returns 환율
      */
-    getExchangeRate: async () => {
-      const exchangeRateService = ExchangeRateService.getInstance();
-      return await exchangeRateService.getExchangeRate();
+    getExchangeRate: async (_: any, { force }: { force?: boolean }) => {
+      return await globalStateService.getStates('exchangeRate', force);
     },
 
     /**
@@ -62,7 +107,7 @@ export const resolvers = {
       const dividends = await prisma.dividend.findMany({
         orderBy: { date: 'desc' }
       });
-      const exchangeRate = await ExchangeRateService.getInstance().getExchangeRate();
+      const exchangeRate = globalState.exchangeRate.rate;
 
       const filteredDividends = year 
         ? dividends.filter(d => new Date(d.date).getFullYear() === year)
@@ -71,7 +116,9 @@ export const resolvers = {
       return filteredDividends.map((dividend) => ({
         ...dividend,
         date: dividend.date.toISOString(),
-        amountInKRW: dividend.currency === 'USD' ? Number(dividend.amount) * exchangeRate : dividend.amount
+        amountInKRW: dividend.currency === 'USD' 
+          ? Number(dividend.amount || 0) * exchangeRate
+          : Number(dividend.amount || 0)
       }));
     },
 
@@ -82,7 +129,7 @@ export const resolvers = {
      */
     getDividendSummary: async (_: any, { year }: { year?: number }) => {
       const dividends = await prisma.dividend.findMany();
-      const exchangeRate = await ExchangeRateService.getInstance().getExchangeRate();
+      const exchangeRate = globalState.exchangeRate.rate;
 
       const filteredDividends = year 
         ? dividends.filter(d => new Date(d.date).getFullYear() === year)
@@ -90,8 +137,8 @@ export const resolvers = {
 
       const totalAmount = filteredDividends.reduce((sum: number, div) => {
         const amountInKRW = div.currency === 'USD' 
-          ? Number(div.amount) * exchangeRate 
-          : Number(div.amount);
+          ? Number(div.amount || 0) * exchangeRate
+          : Number(div.amount || 0);
         return sum + amountInKRW;
       }, 0);
 
@@ -172,7 +219,6 @@ export const resolvers = {
     getDashboardData: async () => {
       const portfolioService = PortfolioService.getInstance();
       const assetHistoryService = AssetHistoryService.getInstance();
-      const exchangeRateService = ExchangeRateService.getInstance();
       const stockPriceService = StockPriceService.getInstance();
 
       const portfolios = await portfolioService.getAccountPortfolios();
@@ -191,7 +237,7 @@ export const resolvers = {
       const historyWithValue = history.map(h => ({
         ...h,
         date: h.date.toISOString(),
-        value: h.currentValue  // value 필드를 currentValue로 설정
+        value: h.currentValue
       }));
 
       // 주식 정보 조회 및 현재가 업데이트
@@ -200,8 +246,9 @@ export const resolvers = {
         ...stock,
         currentPrice: await stockPriceService.getStockPriceFromCache(stock.symbol, stock.excd)
       })));
-      // 환율
-      const exchangeRate = await exchangeRateService.getExchangeRate();
+
+      // 환율 - globalState에서 가져오기
+      const exchangeRate = globalState.exchangeRate.rate;
 
       // 자산군별 그룹핑 (계층형)
       const assetClassGroups = Object.values(AssetClass)
@@ -258,7 +305,7 @@ export const resolvers = {
               name: stock.name,
               value: stock.assetClass === AssetClass.CASH
                 ? (stock.currency === Currency.USD ? stock.quantity * exchangeRate : stock.quantity)
-                : (stock.currency === Currency.USD ? Number(stock.currentPrice) * exchangeRate * stock.quantity : Number(stock.currentPrice)   * stock.quantity),
+                : (stock.currency === Currency.USD ? Number(stock.currentPrice) * exchangeRate * stock.quantity : Number(stock.currentPrice) * stock.quantity),
               parent: account
             }))
           };
@@ -277,7 +324,49 @@ export const resolvers = {
         assetClassGroups,
         accountGroups
       };
-    }
+    },
+
+    getLatestSalary: async () => {
+      const latestSalary = await prisma.salary.findFirst({
+        orderBy: { date: 'desc' }
+      });
+      return latestSalary?.netAmount || 0;
+    },
+
+    getMonthlyPayments: async () => {
+      return await prisma.regularPayment.findMany({
+        where: { type: 'monthly' },
+        orderBy: [
+          { paymentDate: 'asc' },  // 결제일 기준 오름차순
+          { detail: 'asc' }        // 같은 결제일인 경우 상세 내용으로 정렬
+        ]
+      });
+    },
+
+    getYearlyPayments: async () => {
+      return await prisma.regularPayment.findMany({
+        where: { type: 'yearly' },
+        orderBy: [
+          { paymentDate: 'asc' },  // 결제월 기준 오름차순
+          { detail: 'asc' }        // 같은 결제월인 경우 상세 내용으로 정렬
+        ]
+      });
+    },
+
+    getPlanItems: async () => {
+      return await prisma.planItem.findMany({
+        orderBy: [
+          { category: 'asc' },
+          { detail: 'asc' }
+        ]
+      });
+    },
+
+    getTransferPlans: async () => {
+      return await prisma.transferPlan.findMany({
+        orderBy: { transferDate: 'asc' }
+      });
+    },
   },
   Mutation: {
     /**
@@ -323,7 +412,7 @@ export const resolvers = {
 
     /**
      * 주식 추가
-     * @param { input: { symbol: string; name: string; quantity: number; avgPrice: number; currency: Currency; assetClass: AssetClass; account: Account; excd: Exchange } } 주식 심볼, 이름, 수량, 평균가, 화폐, 자산 클래스, 계좌, 거래소 코드
+     * @param { input: { symbol: string; name: string; quantity: number; avgPrice: number; currency: Currency; assetClass: AssetClass; account: Account; excd: Exchange } } ���식 심볼, 이름, 수량, 평균가, 화폐, 자산 클래스, 계좌, 거래소 코드
      * @returns 주식 정보
      */
     addStock: async (_: any, { input }: { input: { 
@@ -429,7 +518,7 @@ export const resolvers = {
     },
 
     /**
-     * 투자금액 삭제
+     * 투자금액 삭
      * @param { id: number } 투자금액 id
      * @returns 투자금액 정보
      */
@@ -482,5 +571,88 @@ export const resolvers = {
         where: { id }
       });
     },
+
+    addRegularPayment: async (_, { type, input }) => {
+      return await prisma.regularPayment.create({
+        data: { ...input, type }
+      });
+    },
+
+    updateRegularPayment: async (_, { id, input }) => {
+      return await prisma.regularPayment.update({
+        where: { id: parseInt(id) },
+        data: input
+      });
+    },
+
+    deleteRegularPayment: async (_, { id }) => {
+      await prisma.regularPayment.delete({
+        where: { id: parseInt(id) }
+      });
+      return true;
+    },
+
+    addPlanItem: async (_, { input }) => {
+      // 최신 salary 조회
+      const latestSalary = await prisma.salary.findFirst({
+        orderBy: { date: 'desc' }
+      });
+      const salary = latestSalary?.netAmount || 0;
+
+      return await prisma.planItem.create({
+        data: {
+          category: input.category,
+          detail: input.detail,
+          amount: input.amount,
+          ratio: salary > 0 ? (input.amount / salary) * 100 : 0,  // 월급 기준으로 비중 계산
+          note: input.note
+        }
+      });
+    },
+
+    updatePlanItem: async (_, { id, input }) => {
+      // 최신 salary 조회
+      const latestSalary = await prisma.salary.findFirst({
+        orderBy: { date: 'desc' }
+      });
+      const salary = latestSalary?.netAmount || 0;
+
+      return await prisma.planItem.update({
+        where: { id: parseInt(id) },
+        data: {
+          category: input.category,
+          detail: input.detail,
+          amount: input.amount,
+          ratio: salary > 0 ? (input.amount / salary) * 100 : 0,  // 월급 기준으로 비중 계산
+          note: input.note
+        }
+      });
+    },
+
+    addTransferPlan: async (_, { input }) => {
+      return await prisma.transferPlan.create({
+        data: {
+          item: input.item,
+          transferDate: input.transferDate,
+          amount: input.amount,
+          bank: input.bank || "",
+          note: input.note || "",
+        }
+      });
+    },
+
+    updateTransferPlan: async (_, { item, input }) => {
+      return await prisma.transferPlan.update({
+        where: { item },  // id 대신 item으로 찾기
+        data: {
+          transferDate: input.transferDate,
+          bank: input.bank || "",
+          note: input.note || "",
+        }
+      });
+    },
   }
 };
+
+// 다른 서비스에서 사용할 수 있도록 export
+export { globalState, updateToken, updateExchangeRate };

@@ -3,8 +3,8 @@ import { useQuery, useMutation } from "@apollo/client";
 import styled from "styled-components";
 import { formatNumber } from "../utils/numberFormat";
 import Button from "../components/common/Button";
+import AddDividendModal from "../components/dividend/AddDividendModal";
 import { GET_DIVIDENDS, GET_DIVIDEND_SUMMARY } from "../graphql/queries";
-import AddDividendModal from "../components/AddDividendModal";
 import { DELETE_DIVIDEND } from "../graphql/mutations";
 import { toast } from "react-hot-toast";
 
