@@ -14,28 +14,9 @@ import StockCard from "../common/StockCard";
 import EditStockModal from "./EditStockModal";
 import AddStockModal from "./AddStockModal";
 import { toast } from "react-hot-toast";
-
-interface Stock {
-  id: number;
-  symbol: string;
-  name: string;
-  quantity: number;
-  currentPrice: number;
-  avgPrice: number;
-  returnPct: number;
-  changeRate: number;
-  assetClass: string;
-  currency: string;
-}
-
-interface Portfolio {
-  account: string;
-  description?: string;
-  investmentAmount: number;
-  currentValue: number;
-  returnRate: number;
-  stocks: Stock[];
-}
+import DonutChart from "../charts/DonutChart";
+import { Stock } from "../../types/portfolio";
+import { Portfolio } from "../../types/portfolio";
 
 interface Props {
   portfolio: Portfolio;
@@ -134,6 +115,23 @@ const PortfolioDetail: React.FC<Props> = ({
     refetch();
   };
 
+  const stockDistributionData = portfolio.stocks
+    .map((stock: Stock) => {
+      const value =
+        stock.assetClass === "CASH"
+          ? stock.quantity * (stock.currency === "USD" ? stock.currentPrice : 1)
+          : stock.quantity *
+            stock.currentPrice *
+            (stock.currency === "USD" ? portfolio.exchangeRate : 1);
+
+      return {
+        id: stock.name,
+        label: `${stock.name} (${stock.symbol})`,
+        value: value,
+      };
+    })
+    .filter((item: any) => item.value > 0);
+
   return (
     <Modal onClose={onClose}>
       <Container>
@@ -171,6 +169,22 @@ const PortfolioDetail: React.FC<Props> = ({
             </ReturnValue>
           </InfoItem>
         </SummaryInfo>
+
+        <ChartSection>
+          <ChartTitle>자산 분포</ChartTitle>
+          <DonutChart
+            data={stockDistributionData}
+            valueFormat={(value) => {
+              const percentage = (
+                (value / portfolio.currentValue) *
+                100
+              ).toFixed(1);
+              return `₩${Number(value)
+                .toFixed(0)
+                .toLocaleString()} (${percentage}%)`;
+            }}
+          />
+        </ChartSection>
 
         <StockGrid>
           {portfolio.stocks.map((stock: Stock) => (
@@ -303,6 +317,20 @@ const ReturnValue = styled.span<{ positive: boolean }>`
 
 const RefreshIcon = styled.span`
   margin-right: 4px;
+`;
+
+const ChartSection = styled.div`
+  margin: 20px 0;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const ChartTitle = styled.h3`
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  color: #666;
 `;
 
 export default PortfolioDetail;

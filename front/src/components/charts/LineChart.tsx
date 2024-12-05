@@ -1,6 +1,5 @@
 import React from "react";
-import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
+import { ResponsiveLine } from "@nivo/line";
 
 interface Series {
   name: string;
@@ -20,91 +19,86 @@ interface Props {
   yAxis: YAxis[];
 }
 
-const LineChart: React.FC<Props> = ({ data, series, yAxis }) => {
+const LineChart: React.FC<Props> = ({ data, series }) => {
   const sortedData = [...data].reverse();
 
-  const options = {
-    chart: {
-      type: "line",
-      height: "100%",
-    },
-    title: { text: "" },
-    xAxis: {
-      categories: sortedData.map((item) => {
-        try {
-          const date = new Date(item.date);
-          if (isNaN(date.getTime())) {
-            console.error("Invalid date:", item.date);
-            return "";
-          }
-          return `${date.getFullYear().toString().slice(-2)}-${
-            date.getMonth() + 1
-          }-${date.getDate()}`;
-        } catch (e) {
-          console.error("Date parsing error:", e);
-          return "";
-        }
-      }),
-      labels: {
-        rotation: -45,
-        style: {
-          fontSize: "11px",
-        },
-      },
-    },
-    yAxis: series.some((s) => s.yAxis === 1)
-      ? [
-          {
-            title: { text: "" },
-            labels: {
-              formatter: function () {
-                return Highcharts.numberFormat(this.value / 1000000, 0);
-              },
-            },
-          },
-          {
-            title: { text: "" },
-            labels: {
-              formatter: function () {
-                return this.value + "%";
-              },
-            },
-            opposite: true,
-          },
-        ]
-      : [
-          {
-            title: { text: "" },
-            labels: {
-              formatter: function () {
-                return Highcharts.numberFormat(this.value / 1000000, 0);
-              },
-            },
-          },
-        ],
-    series: series.map((s) => ({
-      name: s.name,
-      data: sortedData.map((item) => item[s.key]),
-      type: s.type,
-      yAxis: s.yAxis || 0,
+  const chartData = series.map((s) => ({
+    id: s.name,
+    data: sortedData.map((item) => ({
+      x: new Date(item.date).toLocaleDateString(),
+      y: s.yAxis === 1 ? item[s.key] : item[s.key] / 1000000,
     })),
-    tooltip: {
-      shared: true,
-      formatter: function () {
-        return this.points
-          .map((point) => {
-            const series = point.series;
-            const value = point.y;
-            const yAxis = series.yAxis;
-            const format = yAxis.options.labels.formatter.call({ value });
-            return `${series.name}: ${format}`;
-          })
-          .join("<br/>");
-      },
-    },
+  }));
+
+  const filterTicks = (value: string) => {
+    const date = new Date(value);
+    const isFirstDayOfMonth = date.getDate() === 1;
+    return isFirstDayOfMonth;
   };
 
-  return <HighchartsReact highcharts={Highcharts} options={options} />;
+  return (
+    <div style={{ height: "400px" }}>
+      <ResponsiveLine
+        data={chartData}
+        margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+        xScale={{ type: "point" }}
+        yScale={{
+          type: "linear",
+          min: "auto",
+          max: "auto",
+          stacked: false,
+        }}
+        curve="monotoneX"
+        enablePoints={false}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: -45,
+          format: (value) => {
+            const date = new Date(value);
+            return date.toLocaleDateString("ko-KR", {
+              year: "2-digit",
+              month: "numeric",
+            });
+          },
+          tickValues: chartData[0].data
+            .filter((d) => filterTicks(d.x))
+            .map((d) => d.x),
+        }}
+        axisLeft={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+        }}
+        pointSize={10}
+        pointColor={{ theme: "background" }}
+        pointBorderWidth={2}
+        pointBorderColor={{ from: "serieColor" }}
+        pointLabelYOffset={-12}
+        enableGridX={false}
+        useMesh={true}
+        legends={[
+          {
+            anchor: "bottom-right",
+            direction: "column",
+            justify: false,
+            translateX: 100,
+            translateY: 0,
+            itemsSpacing: 0,
+            itemDirection: "left-to-right",
+            itemWidth: 80,
+            itemHeight: 20,
+            itemOpacity: 0.75,
+            symbolSize: 12,
+            symbolShape: "circle",
+            symbolBorderColor: "rgba(0, 0, 0, .5)",
+          },
+        ]}
+      />
+    </div>
+  );
 };
 
 export default LineChart;

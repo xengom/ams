@@ -30,6 +30,7 @@ export const typeDefs = gql`
     currentValue: Float!
     returnRate: Float!
     stocks: [AccountStock!]!
+    exchangeRate: Float!
   }
 
   type AccountStock {

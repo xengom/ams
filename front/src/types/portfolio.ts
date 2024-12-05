@@ -13,8 +13,10 @@ export interface Stock {
 
 export interface Portfolio {
   account: string;
+  description?: string;
   investmentAmount: number;
   currentValue: number;
   returnRate: number;
   stocks: Stock[];
-} 
+  exchangeRate: number;
+}

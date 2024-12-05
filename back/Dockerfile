@@ -1,15 +1,16 @@
-FROM node:18
+FROM node:20-alpine
+
+ENV NODE_ENV=production
 
 WORKDIR /app
 
+# Copy pre-built files and dependencies
 COPY package*.json ./
-COPY prisma ./prisma/
+RUN npm install --only=production
 
-RUN npm install
-
-COPY . .
-RUN npm run build
+COPY dist ./dist
+COPY prisma ./prisma
+COPY .env .
 
 EXPOSE 4000
-
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:prod"]

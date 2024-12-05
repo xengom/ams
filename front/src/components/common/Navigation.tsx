@@ -20,6 +20,10 @@ const Navigation: React.FC = () => {
       label: <Link to="/dividend">Dividend</Link>,
     },
     {
+      key: "/history",
+      label: <Link to="/history">History</Link>,
+    },
+    {
       key: "/income",
       label: <Link to="/income">Income</Link>,
     },

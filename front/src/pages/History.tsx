@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import styled from "styled-components";
 import { GET_ASSET_HISTORY } from "../graphql/queries";

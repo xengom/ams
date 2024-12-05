@@ -23,9 +23,21 @@ export class AssetHistoryService {
 
   private initScheduler() {
     // 매일 오전 5시에 실행
-    cron.schedule('0 5 * * *', async () => {
-      await this.createDailyHistory();
+    const job = cron.schedule('0 5 * * *', async () => {
+      console.log('Running daily history job at:', new Date().toISOString());
+      try {
+        await this.createDailyHistory();
+        console.log('Daily history job completed successfully');
+      } catch (error) {
+        console.error('Error in daily history job:', error);
+      }
+    }, {
+      scheduled: true,
+      timezone: "Asia/Seoul"  // 한국 시간대 설정
     });
+
+    job.start();  // 명시적으로 스케줄러 시작
+    console.log('Asset history scheduler started');
   }
 
   private async createDailyHistory() {

@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 interface Props {
   children: React.ReactNode;
@@ -9,9 +9,7 @@ interface Props {
 const Modal: React.FC<Props> = ({ children, onClose }) => {
   return (
     <Overlay onClick={onClose}>
-      <Content onClick={e => e.stopPropagation()}>
-        {children}
-      </Content>
+      <Content onClick={(e) => e.stopPropagation()}>{children}</Content>
     </Overlay>
   );
 };
@@ -27,6 +25,7 @@ const Overlay = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  overflow: hidden;
 `;
 
 const Content = styled.div`
@@ -36,6 +35,9 @@ const Content = styled.div`
   max-width: 90%;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 `;
 
-export default Modal; 
+export default Modal;

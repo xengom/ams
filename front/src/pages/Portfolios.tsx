@@ -1,32 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import styled from "styled-components";
 import { GET_ACCOUNT_PORTFOLIOS } from "../graphql/queries";
 import { formatNumber } from "../utils/numberFormat";
 import PortfolioDetail from "../components/portfolio/PortfolioDetail";
 import AddPortfolioModal from "../components/portfolio/AddPortfolioModal";
-
-interface Stock {
-  id: number;
-  symbol: string;
-  name: string;
-  quantity: number;
-  currentPrice: number;
-  avgPrice: number;
-  returnPct: number;
-  changeRate: number;
-  assetClass: string;
-  currency: string;
-}
-
-interface Portfolio {
-  account: string;
-  description?: string;
-  investmentAmount: number;
-  currentValue: number;
-  returnRate: number;
-  stocks: Stock[];
-}
+import { Portfolio } from "../types/portfolio";
 
 const Portfolios = () => {
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(

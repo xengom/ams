@@ -34,7 +34,7 @@ export const Plan: React.FC = () => {
   useEffect(() => {
     if (exchangeRateData?.getExchangeRate && monthlyData?.getMonthlyPayments) {
       const total = monthlyData.getMonthlyPayments.reduce(
-        (sum, item) =>
+        (sum: number, item: any) =>
           sum +
           (item.currency === "USD"
             ? item.amount * exchangeRateData.getExchangeRate
@@ -46,7 +46,7 @@ export const Plan: React.FC = () => {
 
     if (exchangeRateData?.getExchangeRate && yearlyData?.getYearlyPayments) {
       const total = yearlyData.getYearlyPayments.reduce(
-        (sum, item) =>
+        (sum: number, item: any) =>
           sum +
           (item.currency === "USD"
             ? item.amount * exchangeRateData.getExchangeRate
@@ -59,12 +59,14 @@ export const Plan: React.FC = () => {
 
   const calculateLivingExpense = () => {
     const savingAndInvestment = (planData?.getPlanItems || [])
-      .filter((item) => ["SAVING", "INVESTMENT"].includes(item.category))
-      .reduce((sum, item) => sum + item.amount, 0);
+      .filter((item: any) => ["SAVING", "INVESTMENT"].includes(item.category))
+      .reduce((sum: number, item: any) => sum + item.amount, 0);
 
     const reserveFund = (planData?.getPlanItems || [])
-      .filter((item) => item.category === "LIVING" && item.detail === "예비비")
-      .reduce((sum, item) => sum + item.amount, 0);
+      .filter(
+        (item: any) => item.category === "LIVING" && item.detail === "예비비"
+      )
+      .reduce((sum: number, item: any) => sum + item.amount, 0);
 
     return (
       salary -

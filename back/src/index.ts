@@ -2,6 +2,7 @@ import { ApolloServer } from 'apollo-server';
 import { typeDefs } from './schema';
 import { resolvers } from './resolvers';
 import { getGlobalStateService } from './extAPIServices/getGlobalStateService';
+import { AssetHistoryService } from './amsServices/assetHistoryService';
 
 async function initializeGlobalStates() {
   const globalStateService = getGlobalStateService.getInstance();
@@ -24,14 +25,23 @@ async function initializeGlobalStates() {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  cache: "bounded",
   cors: {
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://mognex.iptime.org:19876',
+      'http://mognex.iptime.org:19877',
+      'http://backend:4000',
+      'http://frontend',
+      'http://nginx'
+    ],
     credentials: true
   }
 });
 
 // 서버 시작 전에 전역 상태 초기화
 initializeGlobalStates().then(() => {
+  AssetHistoryService.getInstance();
+  
   server.listen().then(({ url }) => {
     console.log(`🚀 Server ready at ${url}`);
   });

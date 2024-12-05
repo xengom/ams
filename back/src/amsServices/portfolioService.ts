@@ -78,7 +78,8 @@ export class PortfolioService {
           investmentAmount,
           currentValue,
           returnRate,
-          stocks: stocksWithPrices
+          stocks: stocksWithPrices,
+          exchangeRate: exchangeRate
         };
       }));
 

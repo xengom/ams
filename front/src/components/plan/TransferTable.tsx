@@ -44,7 +44,7 @@ const TransferTable: React.FC<Props> = ({ data, planItems }) => {
 
   // 편집 모드 시작 시 현재 데이터로 초기화
   const handleEdit = () => {
-    setEditedPlans(transferPlans);
+    setEditedPlans(transferPlans as any);
     setIsEditing(true);
   };
 
@@ -176,7 +176,10 @@ const TransferTable: React.FC<Props> = ({ data, planItems }) => {
     },
   ];
 
-  const totalAmount = transferPlans.reduce((sum, item) => sum + item.amount, 0);
+  const totalAmount = transferPlans.reduce(
+    (sum: number, item: any) => sum + item.amount,
+    0
+  );
 
   return (
     <>
@@ -188,7 +191,7 @@ const TransferTable: React.FC<Props> = ({ data, planItems }) => {
       <div>
         <Table
           columns={columns}
-          dataSource={isEditing ? editedPlans : transferPlans}
+          dataSource={isEditing ? (editedPlans as any) : (transferPlans as any)}
           rowKey="item"
           pagination={false}
           summary={() => (

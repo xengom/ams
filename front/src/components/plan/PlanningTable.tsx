@@ -204,7 +204,7 @@ const PlanningTable: React.FC<Props> = ({ data, salary, fixedCost }) => {
 
       <Table
         columns={columns}
-        dataSource={dataWithAutoCalculated}
+        dataSource={dataWithAutoCalculated as any}
         rowKey="id"
         pagination={false}
       />

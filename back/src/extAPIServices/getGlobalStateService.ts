@@ -12,8 +12,8 @@ export class getGlobalStateService {
   private apiPromise: Promise<apiResponseTypes> | null = null;
 
   private constructor() {
-    this.APP_KEY = process.env.KOREA_INVESTMENT_APPKEY || '';
-    this.APP_SECRET = process.env.KOREA_INVESTMENT_APPSECRET || '';
+    this.APP_KEY = process.env.KOREA_INVESTMENT_APPKEY!;
+    this.APP_SECRET = process.env.KOREA_INVESTMENT_APPSECRET!;
   }
 
   static getInstance(): getGlobalStateService {
@@ -87,15 +87,17 @@ export class getGlobalStateService {
   async parseResponse(type: string, response: any): Promise<apiResponseTypes> {
     switch (type) {
       case 'exchangeRate':
-        if (!response.data?.country?.[1]?.value) {
+        const rate = response.data?.country?.[1]?.value;
+        if (!rate) {
           throw new Error('Failed to parse Naver response');
         }
-        return parseFloat(response.data.country[1].value.replace(',', ''));
+        return parseFloat(rate.replace(',', ''));
       case 'token':
-        if (!response.data?.access_token) {
+        const accessToken = response.data?.access_token;
+        if (!accessToken) {
           throw new Error('Failed to get access token');
         }
-        return response.data.access_token;
+        return accessToken;
       default:
         throw new Error('Failed to parse response');
     }
@@ -113,11 +115,11 @@ export class getGlobalStateService {
       default:
         throw new Error('Invalid type');
     }
-    const { state, lastUpdatedAt } = data;
+    const { rate, lastUpdatedAt } = data;
 
     if (!this.shouldFetchNewApi(lastUpdatedAt, type, force)) {
-      console.log(`Using cached ${type}: ${type === 'exchangeRate' ? state.exchangeRate : state.accessToken}`);
-      return state;
+      console.log(`Using cached ${type}: ${type === 'exchangeRate' ? rate : data.accessToken}`);
+      return type === 'exchangeRate' ? rate : data.accessToken;
     }
 
     if (this.apiPromise) {

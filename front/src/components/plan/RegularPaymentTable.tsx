@@ -16,12 +16,7 @@ interface Props {
   exchangeRate: number;
 }
 
-const RegularPaymentTable: React.FC<Props> = ({
-  data,
-  type,
-  total,
-  exchangeRate,
-}) => {
+const RegularPaymentTable: React.FC<Props> = ({ data, type, exchangeRate }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<RegularPayment | null>(
     null
@@ -103,8 +98,8 @@ const RegularPaymentTable: React.FC<Props> = ({
       render: (amount: number, record: RegularPayment) => {
         const displayAmount =
           record.currency === "USD"
-            ? Math.round(amount * exchangeRate)
-            : Math.round(amount);
+            ? `${Math.round(amount * exchangeRate)} (${amount} USD)`
+            : `${Math.round(amount)}`;
         return `${displayAmount.toLocaleString()}`;
       },
     },
