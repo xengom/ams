@@ -1,6 +1,6 @@
-import React from 'react';
-import styled from 'styled-components';
-import { formatNumber } from '../../utils/numberFormat';
+import React from "react";
+import styled from "styled-components";
+import { formatNumber } from "../../utils/numberFormat";
 
 interface Props {
   symbol: string;
@@ -12,6 +12,9 @@ interface Props {
   changeRate: number;
   currency: string;
   assetClass: string;
+  targetPct: number;
+  totalInvestment: number;
+  exchangeRate: number;
   onClick?: () => void;
 }
 
@@ -25,8 +28,22 @@ const StockCard: React.FC<Props> = ({
   changeRate,
   currency,
   assetClass,
-  onClick
+  targetPct,
+  totalInvestment,
+  exchangeRate,
+  onClick,
 }) => {
+  const targetAmount = (totalInvestment * targetPct) / 100;
+  const targetQuantity =
+    currency === "USD"
+      ? targetAmount / (currentPrice * exchangeRate)
+      : targetAmount / currentPrice;
+  const additionalShares = Math.ceil(targetQuantity) - quantity;
+  console.log(`
+    targetAmount: ${targetAmount}
+    targetQuantity: ${targetQuantity}
+    additionalShares: ${additionalShares}
+  `);
   return (
     <Container onClick={onClick}>
       <Header>
@@ -40,11 +57,17 @@ const StockCard: React.FC<Props> = ({
         </Row>
         <Row>
           <Label>현재가</Label>
-          <Value>{currency === 'USD' ? '$' : '₩'}{formatNumber(currentPrice, currency === 'USD' ? 2 : 0)}</Value>
+          <Value>
+            {currency === "USD" ? "$" : "₩"}
+            {formatNumber(currentPrice, currency === "USD" ? 2 : 0)}
+          </Value>
         </Row>
         <Row>
           <Label>평균단가</Label>
-          <Value>{currency === 'USD' ? '$' : '₩'}{formatNumber(avgPrice, currency === 'USD' ? 2 : 0)}</Value>
+          <Value>
+            {currency === "USD" ? "$" : "₩"}
+            {formatNumber(avgPrice, currency === "USD" ? 2 : 0)}
+          </Value>
         </Row>
         <Row>
           <Label>수익률</Label>
@@ -58,6 +81,14 @@ const StockCard: React.FC<Props> = ({
             {changeRate.toFixed(2)}%
           </ReturnValue>
         </Row>
+        <Row>
+          <Label>목표비율</Label>
+          <Value>{targetPct}%</Value>
+        </Row>
+        <Row>
+          <Label>추매 필요 수량</Label>
+          <Value>{additionalShares}</Value>
+        </Row>
       </Content>
       <Footer>
         <AssetClass>{assetClass}</AssetClass>
@@ -70,7 +101,7 @@ const Container = styled.div`
   background: white;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s;
 
@@ -117,7 +148,7 @@ const Value = styled.span`
 
 const ReturnValue = styled.span<{ positive: boolean }>`
   font-weight: 500;
-  color: ${props => props.positive ? '#e31b23' : '#1261c4'};
+  color: ${(props) => (props.positive ? "#e31b23" : "#1261c4")};
 `;
 
 const Footer = styled.div`

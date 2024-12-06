@@ -179,9 +179,7 @@ const PortfolioDetail: React.FC<Props> = ({
                 (value / portfolio.currentValue) *
                 100
               ).toFixed(1);
-              return `₩${Number(value)
-                .toFixed(0)
-                .toLocaleString()} (${percentage}%)`;
+              return `${percentage}%`;
             }}
           />
         </ChartSection>
@@ -192,6 +190,9 @@ const PortfolioDetail: React.FC<Props> = ({
               key={stock.id}
               {...stock}
               onClick={() => handleEdit(stock)}
+              targetPct={stock.targetPct || 100}
+              exchangeRate={portfolio.exchangeRate}
+              totalInvestment={portfolio.currentValue}
             />
           ))}
         </StockGrid>
@@ -199,6 +200,8 @@ const PortfolioDetail: React.FC<Props> = ({
         {editingStock && (
           <EditStockModal
             stock={editingStock}
+            totalInvestment={portfolio.currentValue}
+            exchangeRate={portfolio.exchangeRate}
             onSave={handleSave}
             onDelete={() => handleDelete(editingStock)}
             onClose={() => setEditingStock(null)}

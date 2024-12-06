@@ -2,21 +2,17 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Modal from "../common/Modal";
 import Button from "../common/Button";
+import { Stock } from "../../types/portfolio";
 
 interface Props {
-  stock: {
-    id: number;
-    symbol: string;
-    name: string;
-    quantity: number;
-    avgPrice: number;
-    assetClass: string;
-    currency: string;
-  };
+  stock: Stock;
+  totalInvestment: number;
+  exchangeRate: number;
   onSave: (values: {
     quantity: number;
     avgPrice: number;
     assetClass: string;
+    targetPct: number;
   }) => void;
   onDelete: () => void;
   onClose: () => void;
@@ -24,6 +20,8 @@ interface Props {
 
 const EditStockModal: React.FC<Props> = ({
   stock,
+  totalInvestment,
+  exchangeRate,
   onSave,
   onDelete,
   onClose,
@@ -31,14 +29,22 @@ const EditStockModal: React.FC<Props> = ({
   const [quantity, setQuantity] = useState(stock.quantity);
   const [avgPrice, setAvgPrice] = useState(stock.avgPrice);
   const [assetClass, setAssetClass] = useState(stock.assetClass);
+  const [targetPct, setTargetPct] = useState(stock.targetPct);
 
   const isCashSymbol =
     stock.symbol.endsWith("-USD") || stock.symbol.endsWith("-KRW");
   const isCashAsset = assetClass === "CASH" || isCashSymbol;
 
+  const targetAmount = (totalInvestment * targetPct) / 100;
+  const targetQuantity =
+    stock.currency === "USD"
+      ? targetAmount / (stock.currentPrice * exchangeRate)
+      : targetAmount / stock.currentPrice;
+  const additionalShares = Math.ceil(targetQuantity) - quantity;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ quantity, avgPrice, assetClass });
+    onSave({ quantity, avgPrice, assetClass, targetPct });
   };
 
   return (
@@ -85,6 +91,21 @@ const EditStockModal: React.FC<Props> = ({
               <option value="CASH">현금</option>
               <option value="COMMODITY">원자재</option>
             </Select>
+          </FormGroup>
+          <FormGroup>
+            <Label>목표비율 (%)</Label>
+            <Input
+              type="number"
+              min="0"
+              max="100"
+              value={targetPct}
+              onChange={(e) => setTargetPct(parseFloat(e.target.value))}
+              required
+            />
+          </FormGroup>
+          <FormGroup>
+            <Label>추가 구매 필요 수량</Label>
+            <Value>{additionalShares}주</Value>
           </FormGroup>
           <ButtonGroup>
             <Button type="submit">저장</Button>
@@ -162,6 +183,10 @@ const Select = styled.select`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+`;
+
+const Value = styled.span`
+  font-weight: 500;
 `;
 
 const ButtonGroup = styled.div`

@@ -42,6 +42,7 @@ export const typeDefs = gql`
     avgPrice: Float!
     returnPct: Float!
     changeRate: Float!
+    targetPct: Float
     assetClass: AssetClass!
     currency: Currency!
   }
@@ -50,6 +51,7 @@ export const typeDefs = gql`
     quantity: Float!
     avgPrice: Float!
     assetClass: String!
+    targetPct: Float
   }
 
   type Stock {
@@ -62,6 +64,7 @@ export const typeDefs = gql`
     assetClass: String!
     account: String!
     excd: String
+    targetPct: Float
     createdAt: String!
     updatedAt: String!
   }

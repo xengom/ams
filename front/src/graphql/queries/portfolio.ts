@@ -46,6 +46,7 @@ export const GET_ACCOUNT_PORTFOLIOS = gql`
         changeRate
         assetClass
         currency
+        targetPct
       }
     }
   }

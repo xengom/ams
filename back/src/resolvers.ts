@@ -371,16 +371,17 @@ export const resolvers = {
   Mutation: {
     /**
      * 주식 수정
-     * @param { id: number, input: { quantity: number, avgPrice: number, assetClass: string } } 주식 id, 수량, 평균가, 자산 클래스
+     * @param { id: number, input: { quantity: number, avgPrice: number, assetClass: string, targetPct: number } } 주식 id, 수량, 평균가, 자산 클래스, 목표비율 
      * @returns 주식 정보
      */
-    updateStock: async (_: any, { id, input }: { id: number; input: { quantity: number; avgPrice: number; assetClass: string } }) => {
+    updateStock: async (_: any, { id, input }: { id: number; input: { quantity: number; avgPrice: number; assetClass: string; targetPct: number } }) => {
       return await prisma.stock.update({
         where: { id },
         data: {
           quantity: input.quantity,
           avgPrice: input.avgPrice,
-          assetClass: input.assetClass as AssetClass
+          assetClass: input.assetClass as AssetClass,
+          targetPct: input.targetPct
         }
       });
     },

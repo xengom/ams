@@ -9,6 +9,7 @@ export interface Stock {
   changeRate: number;
   assetClass: string;
   currency: string;
+  targetPct: number;
 }
 
 export interface Portfolio {

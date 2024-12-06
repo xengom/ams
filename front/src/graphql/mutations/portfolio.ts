@@ -7,6 +7,7 @@ export const UPDATE_STOCK = gql`
       quantity
       avgPrice
       assetClass
+      targetPct
     }
   }
 `;

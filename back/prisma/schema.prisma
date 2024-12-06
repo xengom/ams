@@ -54,6 +54,7 @@ model stock {
   assetClass   AssetClass
   account      Account
   excd         Exchange?
+  targetPct    Float?     @default(100)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
