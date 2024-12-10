@@ -3,7 +3,7 @@ FROM node:20-alpine
 ENV NODE_ENV=production
 
 WORKDIR /app
-
+RUN apk add --no-cache openssl
 # Copy pre-built files and dependencies
 COPY package*.json ./
 RUN npm install --only=production
