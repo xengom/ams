@@ -39,11 +39,6 @@ const StockCard: React.FC<Props> = ({
       ? targetAmount / (currentPrice * exchangeRate)
       : targetAmount / currentPrice;
   const additionalShares = Math.ceil(targetQuantity) - quantity;
-  console.log(`
-    targetAmount: ${targetAmount}
-    targetQuantity: ${targetQuantity}
-    additionalShares: ${additionalShares}
-  `);
   return (
     <Container onClick={onClick}>
       <Header>
