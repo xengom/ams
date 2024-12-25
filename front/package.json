@@ -10,12 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@apollo/client": "^3.11.10",
+    "@apollo/client": "^3.12.2",
     "@nivo/core": "^0.88.0",
     "@nivo/line": "^0.88.0",
     "@nivo/pie": "^0.88.0",
     "@nivo/treemap": "^0.88.0",
-    "antd": "^5.22.2",
+    "antd": "^5.22.4",
     "axios": "^1.7.8",
     "graphql": "^16.9.0",
     "react": "^18.3.1",

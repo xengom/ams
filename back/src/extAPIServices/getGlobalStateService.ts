@@ -5,7 +5,7 @@ type apiResponseTypes = string | number;
 
 export class getGlobalStateService {
   private static instance: getGlobalStateService;
-  private readonly TOKEN_EXPIRY_HOURS = 23;
+  private readonly TOKEN_EXPIRY_HOURS = 24;
   private readonly EXCHANGE_RATE_INTERVAL_MINUTES = 5;
   private readonly APP_KEY: string;
   private readonly APP_SECRET: string;

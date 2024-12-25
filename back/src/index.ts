@@ -28,11 +28,7 @@ const server = new ApolloServer({
   cache: "bounded",
   cors: {
     origin: [
-      'http://mognex.iptime.org:19876',
-      'http://mognex.iptime.org:19877',
-      'http://backend:4000',
-      'http://frontend',
-      'http://nginx'
+      'http://mognex.iptime.org:19876'
     ],
     credentials: true
   }
